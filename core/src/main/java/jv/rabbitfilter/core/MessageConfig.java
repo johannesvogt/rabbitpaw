@@ -11,11 +11,13 @@ import java.util.List;
 /**
  * Created by johannes on 18/08/15.
  */
-public class MessageFields implements Iterable<MessageFields.FieldEntry> {
+public class MessageConfig<T> implements Iterable<MessageConfig.FieldEntry> {
 
     private final List<String> fields;
 
-    private MessageFields(Class messageClass) {
+    private final Class<T> messageClass;
+
+    private MessageConfig(Class<T> messageClass) {
         ImmutableSortedSet.Builder<String> setBuilder = ImmutableSortedSet.naturalOrder();
         for (Field field : messageClass.getDeclaredFields()) {
             field.setAccessible(true);
@@ -24,10 +26,11 @@ public class MessageFields implements Iterable<MessageFields.FieldEntry> {
             }
         }
         this.fields = ImmutableList.copyOf(setBuilder.build());
+        this.messageClass = messageClass;
     }
 
-    public static MessageFields of(Class messageClass) {
-        return new MessageFields(messageClass);
+    public static MessageConfig of(Class messageClass) {
+        return new MessageConfig(messageClass);
     }
 
     public Iterator<FieldEntry> iterator() {
@@ -49,6 +52,10 @@ public class MessageFields implements Iterable<MessageFields.FieldEntry> {
         return fields.contains(fieldName);
     }
 
+    public Class<T> getMessageClass() {
+        return messageClass;
+    }
+
     public static class FieldEntry {
         public final String name;
         public final int index;
@@ -64,6 +71,10 @@ public class MessageFields implements Iterable<MessageFields.FieldEntry> {
 
     public int size() {
         return fields.size();
+    }
+
+    public String getExchangeName() {
+        return messageClass.getName();
     }
 
 }

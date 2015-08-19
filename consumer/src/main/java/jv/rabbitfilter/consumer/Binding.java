@@ -2,7 +2,8 @@ package jv.rabbitfilter.consumer;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import jv.rabbitfilter.core.MessageFields.FieldEntry;
+import jv.rabbitfilter.core.MessageConfig;
+import jv.rabbitfilter.core.MessageConfig.FieldEntry;
 
 import java.util.*;
 
@@ -17,12 +18,14 @@ public class Binding implements Iterable<Binding.Stage> {
         this.stages = Lists.newArrayList();
     }
 
-    static Binding create(MessageFilter messageFilter) {
+    static Binding of(MessageFilter messageFilter) {
         Binding binding = new Binding();
 
-        RoutingPattern routingPattern = new RoutingPattern(messageFilter.getMessageFields().size());
+        RoutingPattern routingPattern = new RoutingPattern(messageFilter.getMessageConfig().size());
 
-        for (FieldEntry field : messageFilter.getMessageFields()) {
+        Iterator<MessageConfig.FieldEntry> it = messageFilter.getMessageConfig().iterator();
+        while (it.hasNext()) {
+            FieldEntry field = it.next();
 
             List<String> param = messageFilter.getParam(field.name);
 
@@ -33,7 +36,7 @@ public class Binding implements Iterable<Binding.Stage> {
                 } else {
                     if (routingPattern.parallel != null) {
                         binding.addLevel(routingPattern.render(), field.isLast);
-                        routingPattern = new RoutingPattern(messageFilter.getMessageFields().size());
+                        routingPattern = new RoutingPattern(messageFilter.getMessageConfig().size());
                     }
                     routingPattern.setParallel(field.index, param);
                 }
@@ -69,13 +72,13 @@ public class Binding implements Iterable<Binding.Stage> {
     static class Stage {
         List<String> keys;
 
-        final boolean isLastLevel;
+        final boolean isLast;
 
         final int level;
 
         public Stage(List<String> keys, boolean lastLevel, int level) {
             this.keys = keys;
-            this.isLastLevel = lastLevel;
+            this.isLast = lastLevel;
             this.level = level;
         }
     }

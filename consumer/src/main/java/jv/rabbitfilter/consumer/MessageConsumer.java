@@ -7,6 +7,7 @@ import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
+import jv.rabbitfilter.core.MessageConfig;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -17,12 +18,12 @@ import java.util.function.Consumer;
  */
 public class MessageConsumer<T> extends DefaultConsumer {
 
-    private final Class<T> messageClass;
+    private final MessageConfig<T> messageConfig;
     private final Consumer<T> consumer;
 
-    public MessageConsumer(Channel channel, Consumer<T> consumer, Class<T> messageClass) {
+    public MessageConsumer(Channel channel, Consumer<T> consumer, MessageConfig<T> messageConfig) {
         super(channel);
-        this.messageClass = messageClass;
+        this.messageConfig = messageConfig;
         this.consumer = consumer;
     }
 
@@ -31,7 +32,7 @@ public class MessageConsumer<T> extends DefaultConsumer {
         try {
             String message = new String(body, "UTF-8");
             ObjectMapper mapper = new ObjectMapper();
-            T object = mapper.readValue(message, messageClass);
+            T object = mapper.readValue(message, messageConfig.getMessageClass());
             consumer.accept(object);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();

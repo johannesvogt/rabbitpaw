@@ -3,9 +3,8 @@ package jv.rabbitfilter.consumer;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import jv.rabbitfilter.core.MessageFields;
+import jv.rabbitfilter.core.MessageConfig;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -15,14 +14,14 @@ public class MessageFilter {
 
     private final Class messageClass;
 
-    private final MessageFields messageFields;
+    private final MessageConfig messageConfig;
 
     private final Multimap<String,String> filterParams;
 
     private MessageFilter(Class messageClass) {
         this.messageClass = messageClass;
         this.filterParams = HashMultimap.create();
-        this.messageFields = MessageFields.of(messageClass);
+        this.messageConfig = MessageConfig.of(messageClass);
     }
 
     public static MessageFilter of(Class messageClass) {
@@ -30,7 +29,7 @@ public class MessageFilter {
     }
 
     public MessageFilter thatMatches(String fieldName, String fieldValue) {
-        if (!messageFields.contains(fieldName)) {
+        if (!messageConfig.contains(fieldName)) {
             throw new IllegalArgumentException("Field '" + fieldName + "' not known for type '" + messageClass + "'.");
         }
         filterParams.put(fieldName, fieldValue);
@@ -41,8 +40,8 @@ public class MessageFilter {
         return Lists.newArrayList(filterParams.get(field));
     }
 
-    public MessageFields getMessageFields() {
-        return messageFields;
+    public MessageConfig getMessageConfig() {
+        return messageConfig;
     }
 
 }

@@ -2,6 +2,7 @@ package jv.rabbitfilter.consumer;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
+import jv.rabbitfilter.core.MessageConfig;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -13,19 +14,23 @@ import java.util.function.Consumer;
  */
 public class FilteredListener<T> {
 
-    private final Class messageClass;
+    private final Connection connection;
+    private final Binding binding;
+    private final Consumer<T> consumer;
+    private final MessageConfig messageConfig;
 
-    public FilteredListener(MessageFilter messageFilter, Connection connection, Consumer<T> consumer, Class messageClass) throws IOException {
-        this.messageClass = messageClass;
+    private FilteredListener(MessageFilter messageFilter, Connection connection, Consumer<T> consumer) {
+        this.connection = connection;
+        this.binding = Binding.of(messageFilter);
+        this.consumer = consumer;
+        this.messageConfig = messageFilter.getMessageConfig();
 
-        Channel channel = connection.createChannel();
-        createBindings(channel, Binding.create(messageFilter),
-                messageClass, new MessageConsumer<T>(channel, consumer, messageClass));
     }
 
-    private void createBindings(Channel channel, Binding binding, Class messageClass, com.rabbitmq.client.Consumer consumer) throws IOException {
+    public void bind() throws IOException {
+        Channel channel = connection.createChannel();
 
-        String rootExchange = messageClass.getName();
+        String rootExchange = messageConfig.getExchangeName();
         channel.exchangeDeclare(rootExchange, "topic", false);
 
 
@@ -34,9 +39,10 @@ public class FilteredListener<T> {
 
         String prevExchange = rootExchange;
         for (Binding.Stage stage : binding) {
-            if (stage.isLastLevel) {
+            if (stage.isLast) {
                 for (String key : stage.keys) {
                     channel.queueBind(queueName, prevExchange, key);
+                    channel.basicConsume(queueName, true, new MessageConsumer<T>(channel, consumer, messageConfig));
                 }
             } else {
                 String nextExchange = queueName + stage.level;
@@ -51,7 +57,32 @@ public class FilteredListener<T> {
 
     private SecureRandom random = new SecureRandom();
 
-    public String randomId() {
-        return new BigInteger(66, random).toString(32);
+    private String randomId() {
+        return new BigInteger(130, random).toString(32);
+    }
+
+    public static class Builder<T> {
+        private MessageFilter messageFilter;
+        private Consumer<T> consumer;
+        private Connection connection;
+
+        public FilteredListener build() {
+            return new FilteredListener<T>(messageFilter, connection, consumer);
+        }
+
+        public Builder messageFilter(MessageFilter messageFilter) {
+            this.messageFilter = messageFilter;
+            return this;
+        }
+
+        public Builder consumer(Consumer<T> consumer) {
+            this.consumer = consumer;
+            return this;
+        }
+
+        public Builder connection(Connection connection) {
+            this.connection = connection;
+            return this;
+        }
     }
 }

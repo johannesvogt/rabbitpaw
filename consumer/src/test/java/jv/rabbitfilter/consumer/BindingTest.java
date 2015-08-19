@@ -25,7 +25,7 @@ public class BindingTest {
     public void testEmptyFilter() {
         MessageFilter filter = MessageFilter.of(TestMessage.class);
 
-        Binding binding = Binding.create(filter);
+        Binding binding = Binding.of(filter);
 
         assertThat(binding.getChainSize()).isEqualTo(1);
 
@@ -38,7 +38,7 @@ public class BindingTest {
     public void testSimpleFilter() {
         MessageFilter filter = MessageFilter.of(TestMessage.class).thatMatches("color", "blue");
 
-        Binding binding = Binding.create(filter);
+        Binding binding = Binding.of(filter);
 
         assertThat(binding.getChainSize()).isEqualTo(1);
 
@@ -54,7 +54,7 @@ public class BindingTest {
                 .thatMatches("category", "animal")
                 .thatMatches("location", "sea");
 
-        Binding binding = Binding.create(filter);
+        Binding binding = Binding.of(filter);
 
         assertThat(binding.getChainSize()).isEqualTo(1);
 
@@ -69,7 +69,7 @@ public class BindingTest {
                 .thatMatches("color", "blue")
                 .thatMatches("color", "orange");
 
-        Binding binding = Binding.create(filter);
+        Binding binding = Binding.of(filter);
 
         assertThat(binding.getChainSize()).isEqualTo(1);
 
@@ -87,7 +87,7 @@ public class BindingTest {
                 .thatMatches("location", "zoo")
                 .thatMatches("location", "city");
 
-        Binding binding = Binding.create(filter);
+        Binding binding = Binding.of(filter);
 
         assertThat(binding.getChainSize()).isEqualTo(2);
 
@@ -108,7 +108,7 @@ public class BindingTest {
                 .thatMatches("category", "animal")
                 .thatMatches("category", "car");
 
-        Binding binding = Binding.create(filter);
+        Binding binding = Binding.of(filter);
 
         assertThat(binding.getChainSize()).isEqualTo(2);
 
@@ -130,7 +130,7 @@ public class BindingTest {
                 .thatMatches("category", "animal")
                 .thatMatches("category", "car");
 
-        Binding binding = Binding.create(filter);
+        Binding binding = Binding.of(filter);
 
         assertThat(binding.getChainSize()).isEqualTo(2);
 
@@ -154,7 +154,7 @@ public class BindingTest {
                 .thatMatches("category", "animal")
                 .thatMatches("category", "car");
 
-        Binding binding = Binding.create(filter);
+        Binding binding = Binding.of(filter);
 
         assertThat(binding.getChainSize()).isEqualTo(3);
 
@@ -181,7 +181,7 @@ public class BindingTest {
                 .thatMatches("category", "animal")
                 .thatMatches("category", "car");
 
-        Binding binding = Binding.create(filter);
+        Binding binding = Binding.of(filter);
 
         assertThat(binding.getChainSize()).isEqualTo(2);
 
