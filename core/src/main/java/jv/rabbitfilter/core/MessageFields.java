@@ -32,6 +32,7 @@ public class MessageFields implements Iterable<MessageFields.FieldEntry> {
 
     public Iterator<FieldEntry> iterator() {
         final Iterator<String> iterator = fields.iterator();
+        final int[] index = new int[]{0};
         return new Iterator<FieldEntry>() {
             public boolean hasNext() {
                 return iterator.hasNext();
@@ -39,7 +40,7 @@ public class MessageFields implements Iterable<MessageFields.FieldEntry> {
 
             public FieldEntry next() {
                 String name = iterator.next();
-                return new FieldEntry(name, !iterator.hasNext());
+                return new FieldEntry(name, !iterator.hasNext(), index[0]++);
             }
         };
     }
@@ -50,13 +51,19 @@ public class MessageFields implements Iterable<MessageFields.FieldEntry> {
 
     public static class FieldEntry {
         public final String name;
+        public final int index;
         public final boolean isLast;
 
-        public FieldEntry(String name, boolean isLast) {
+        public FieldEntry(String name, boolean isLast, int index) {
             this.name = name;
             this.isLast = isLast;
+            this.index = index;
         }
 
+    }
+
+    public int size() {
+        return fields.size();
     }
 
 }

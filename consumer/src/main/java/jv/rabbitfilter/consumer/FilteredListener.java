@@ -19,11 +19,11 @@ public class FilteredListener<T> {
         this.messageClass = messageClass;
 
         Channel channel = connection.createChannel();
-        createBindings(channel, Routing.create(messageFilter),
+        createBindings(channel, Binding.create(messageFilter),
                 messageClass, new MessageConsumer<T>(channel, consumer, messageClass));
     }
 
-    private void createBindings(Channel channel, Routing routing, Class messageClass, com.rabbitmq.client.Consumer consumer) throws IOException {
+    private void createBindings(Channel channel, Binding binding, Class messageClass, com.rabbitmq.client.Consumer consumer) throws IOException {
 
         String rootExchange = messageClass.getName();
         channel.exchangeDeclare(rootExchange, "topic", false);
@@ -33,15 +33,15 @@ public class FilteredListener<T> {
         channel.queueDeclare(queueName, false, true, false, null);
 
         String prevExchange = rootExchange;
-        for (Routing.Binding binding : routing) {
-            if (binding.isLastLevel) {
-                for (String key : binding.keys) {
+        for (Binding.Stage stage : binding) {
+            if (stage.isLastLevel) {
+                for (String key : stage.keys) {
                     channel.queueBind(queueName, prevExchange, key);
                 }
             } else {
-                String nextExchange = queueName + binding.level;
+                String nextExchange = queueName + stage.level;
                 channel.exchangeDeclare(nextExchange, "topic", false);
-                for (String key : binding.keys) {
+                for (String key : stage.keys) {
                     channel.exchangeBind(nextExchange, prevExchange, key);
                 }
                 prevExchange = nextExchange;

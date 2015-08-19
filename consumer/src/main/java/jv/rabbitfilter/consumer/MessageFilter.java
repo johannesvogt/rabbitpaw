@@ -1,10 +1,12 @@
 package jv.rabbitfilter.consumer;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import jv.rabbitfilter.core.MessageFields;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by johannes on 15/08/15.
@@ -35,20 +37,8 @@ public class MessageFilter {
         return this;
     }
 
-    boolean acceptsAll(String field) {
-        return !filterParams.containsKey(field) || filterParams.containsEntry(field, "*");
-    }
-
-    boolean acceptsOne(String field) {
-        return filterParams.get(field).size() == 1;
-    }
-
-    String getFirstParam(String field) {
-        return filterParams.get(field).iterator().next();
-    }
-
-    Collection<String> getParam(String field) {
-        return filterParams.get(field);
+    List<String> getParam(String field) {
+        return Lists.newArrayList(filterParams.get(field));
     }
 
     public MessageFields getMessageFields() {
