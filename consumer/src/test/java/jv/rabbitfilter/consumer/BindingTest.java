@@ -194,4 +194,40 @@ public class BindingTest {
         assertThat(binding.getStage(1).keys).contains("*.*.zoo");
 
     }
+
+    @Message
+    private static class TestMessage2 {
+        @Filterable
+        private String category;
+        @Filterable
+        private Object location;
+        @Filterable
+        private String color;
+        @Filterable
+        private String year;
+    }
+
+    @Test
+    public void testParallelFilter7() {
+        MessageFilter filter = MessageFilter.of(TestMessage2.class)
+                .thatMatches("location", "city")
+                .thatMatches("location", "zoo")
+                .thatMatches("color", "orange")
+                .thatMatches("category", "animal")
+                .thatMatches("category", "car")
+                .thatMatches("year", "2015");
+
+        Binding binding = Binding.of(filter);
+
+        assertThat(binding.getChainSize()).isEqualTo(2);
+
+        assertThat(binding.getStage(0).keys.size()).isEqualTo(2);
+        assertThat(binding.getStage(0).keys).contains("animal.orange.*.2015");
+        assertThat(binding.getStage(0).keys).contains("car.orange.*.2015");
+
+        assertThat(binding.getStage(1).keys.size()).isEqualTo(2);
+        assertThat(binding.getStage(1).keys).contains("*.*.city.*");
+        assertThat(binding.getStage(1).keys).contains("*.*.zoo.*");
+
+    }
 }

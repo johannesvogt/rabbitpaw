@@ -18,31 +18,29 @@ public class Binding implements Iterable<Binding.Stage> {
         this.stages = Lists.newArrayList();
     }
 
-    static Binding of(MessageFilter messageFilter) {
+    static <T> Binding of(MessageFilter<T> messageFilter) {
         Binding binding = new Binding();
 
         RoutingPattern routingPattern = new RoutingPattern(messageFilter.getMessageConfig().size());
 
-        Iterator<MessageConfig.FieldEntry> it = messageFilter.getMessageConfig().iterator();
-        while (it.hasNext()) {
-            FieldEntry field = it.next();
-
+        for (FieldEntry field : messageFilter.getMessageConfig()) {
             List<String> param = messageFilter.getParam(field.name);
 
-            if (param != null && !param.isEmpty()) {
-                if (param.size() == 1) {
+            if (param != null && param.size() == 1) {
                     routingPattern.addSequential(field.index, param.get(0));
 
-                } else {
-                    if (routingPattern.parallel != null) {
-                        binding.addLevel(routingPattern.render(), field.isLast);
-                        routingPattern = new RoutingPattern(messageFilter.getMessageConfig().size());
-                    }
-                    routingPattern.setParallel(field.index, param);
-                }
             }
+        }
+        for (FieldEntry field : messageFilter.getMessageConfig()) {
+            List<String> param = messageFilter.getParam(field.name);
 
-
+            if (param != null && param.size() > 1) {
+                if (routingPattern.parallel != null) {
+                    binding.addLevel(routingPattern.render(), field.isLast);
+                    routingPattern = new RoutingPattern(messageFilter.getMessageConfig().size());
+                }
+                routingPattern.setParallel(field.index, param);
+            }
         }
 
         binding.addLevel(routingPattern.render(), true);

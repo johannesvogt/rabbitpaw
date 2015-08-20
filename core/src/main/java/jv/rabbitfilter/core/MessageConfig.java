@@ -29,8 +29,8 @@ public class MessageConfig<T> implements Iterable<MessageConfig.FieldEntry> {
         this.messageClass = messageClass;
     }
 
-    public static MessageConfig of(Class messageClass) {
-        return new MessageConfig(messageClass);
+    public static <T> MessageConfig<T> of(Class<T> messageClass) {
+        return new MessageConfig<T>(messageClass);
     }
 
     public Iterator<FieldEntry> iterator() {

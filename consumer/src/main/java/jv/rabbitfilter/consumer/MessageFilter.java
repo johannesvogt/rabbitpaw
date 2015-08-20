@@ -10,27 +10,24 @@ import java.util.List;
 /**
  * Created by johannes on 15/08/15.
  */
-public class MessageFilter {
+public class MessageFilter<T> {
 
-    private final Class messageClass;
-
-    private final MessageConfig messageConfig;
+    private final MessageConfig<T> messageConfig;
 
     private final Multimap<String,String> filterParams;
 
-    private MessageFilter(Class messageClass) {
-        this.messageClass = messageClass;
+    private MessageFilter(Class<T> messageClass) {
         this.filterParams = HashMultimap.create();
         this.messageConfig = MessageConfig.of(messageClass);
     }
 
-    public static MessageFilter of(Class messageClass) {
-        return new MessageFilter(messageClass);
+    public static <T> MessageFilter<T> of(Class<T> messageClass) {
+        return new MessageFilter<T>(messageClass);
     }
 
-    public MessageFilter thatMatches(String fieldName, String fieldValue) {
+    public MessageFilter<T> thatMatches(String fieldName, String fieldValue) {
         if (!messageConfig.contains(fieldName)) {
-            throw new IllegalArgumentException("Field '" + fieldName + "' not known for type '" + messageClass + "'.");
+            throw new IllegalArgumentException("Field '" + fieldName + "' not known for type '" + messageConfig.getMessageClass() + "'.");
         }
         filterParams.put(fieldName, fieldValue);
         return this;
@@ -40,7 +37,7 @@ public class MessageFilter {
         return Lists.newArrayList(filterParams.get(field));
     }
 
-    public MessageConfig getMessageConfig() {
+    public MessageConfig<T> getMessageConfig() {
         return messageConfig;
     }
 
