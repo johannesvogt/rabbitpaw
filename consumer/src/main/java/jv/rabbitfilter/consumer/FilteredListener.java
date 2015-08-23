@@ -2,11 +2,9 @@ package jv.rabbitfilter.consumer;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
-import jv.rabbitfilter.core.MessageConfig;
+import jv.rabbitfilter.core.MessageDeserializer;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.function.Consumer;
 
 /**
@@ -17,85 +15,71 @@ public class FilteredListener<T> {
     private final Connection connection;
     private final Binding binding;
     private final Consumer<T> consumer;
-    private final MessageConfig<T> messageConfig;
+    private final MessageDeserializer<T> deserializer;
 
-    private String queueName;
     private String consumerTag;
     private Channel channel;
 
-    private FilteredListener(MessageFilter<T> messageFilter, Connection connection, Consumer<T> consumer) {
+    private FilteredListener(MessageFilter<T> messageFilter, Connection connection, Consumer<T> consumer, MessageDeserializer<T> deserializer) {
         this.connection = connection;
         this.binding = Binding.of(messageFilter);
         this.consumer = consumer;
-        this.messageConfig = messageFilter.getMessageConfig();
-
+        if (deserializer == null) {
+            this.deserializer = new DefaultDeserializer<>(messageFilter.getMessageConfig().getMessageClass());
+        } else {
+            this.deserializer = deserializer;
+        }
     }
 
     public void bind() throws IOException {
         channel = connection.createChannel();
 
-        String rootExchange = messageConfig.getExchangeName();
-        channel.exchangeDeclare(rootExchange, "topic", false, true, null);
-
-
-        queueName = randomId();
-        channel.queueDeclare(queueName, false, true, true, null);
-
-        String prevExchange = rootExchange;
         for (Binding.Stage stage : binding) {
-            if (stage.isLast) {
+            channel.exchangeDeclare(stage.src, "topic", false, true, null);
+            if (stage.isQueueBinding) {
+                channel.queueDeclare(stage.dest, false, true, true, null);
                 for (String key : stage.keys) {
-                    channel.queueBind(queueName, prevExchange, key);
-                    consumerTag = channel.basicConsume(queueName, true, new MessageConsumer<T>(channel, consumer, messageConfig));
+                    channel.queueBind(stage.dest, stage.src, key);
+                    consumerTag = channel.basicConsume(stage.dest, true, new MessageConsumer<>(channel, consumer, deserializer));
                 }
             } else {
-                String nextExchange = queueName + stage.level;
-                channel.exchangeDeclare(nextExchange, "topic", false, true, null);
+                channel.exchangeDeclare(stage.dest, "topic", false, true, null);
                 for (String key : stage.keys) {
-                    channel.exchangeBind(nextExchange, prevExchange, key);
+                    channel.exchangeBind(stage.dest, stage.src, key);
                 }
-                prevExchange = nextExchange;
             }
         }
     }
 
     public void unbind() throws IOException {
         channel.basicCancel(consumerTag);
-        String prevExchange = messageConfig.getExchangeName();
         for (Binding.Stage stage : binding) {
-            if (stage.isLast) {
+            if (stage.isQueueBinding) {
                 for (String key : stage.keys) {
-                    channel.queueUnbind(queueName, prevExchange, key);
+                    channel.queueUnbind(stage.dest, stage.src, key);
                 }
             } else {
-                String nextExchange = queueName + stage.level;
                 for (String key : stage.keys) {
-                    channel.exchangeUnbind(nextExchange, prevExchange, key);
+                    channel.exchangeUnbind(stage.dest, stage.src, key);
                 }
-                prevExchange = nextExchange;
             }
         }
     }
 
-    private SecureRandom random = new SecureRandom();
-
-    private String randomId() {
-        return new BigInteger(130, random).toString(32);
-    }
-
     public static <T> Builder<T> builder() {
-        return new Builder<T>();
+        return new Builder<>();
     }
 
     public static class Builder<T> {
         private MessageFilter<T> messageFilter;
         private Consumer<T> consumer;
+        private MessageDeserializer<T> deserializer;
         private Connection connection;
 
         private Builder() {}
 
         public FilteredListener<T> build() {
-            return new FilteredListener<T>(messageFilter, connection, consumer);
+            return new FilteredListener<>(messageFilter, connection, consumer, deserializer);
         }
 
         public Builder<T> messageFilter(MessageFilter<T> messageFilter) {
@@ -105,6 +89,11 @@ public class FilteredListener<T> {
 
         public Builder<T> consumer(Consumer<T> consumer) {
             this.consumer = consumer;
+            return this;
+        }
+
+        public Builder<T> consumer(MessageDeserializer<T> deserializer) {
+            this.deserializer = deserializer;
             return this;
         }
 

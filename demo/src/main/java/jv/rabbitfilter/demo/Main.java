@@ -1,6 +1,5 @@
 package jv.rabbitfilter.demo;
 
-import com.google.common.collect.ImmutableList;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import jv.rabbitfilter.consumer.FilteredListener;
@@ -25,14 +24,14 @@ public class Main {
         Connection connection = factory.newConnection();
 
         MessageFilter<Article> messageFilter = MessageFilter.of(Article.class)
-                .thatMatches("author", "abc")
-                .thatMatches("author", "def")
-                .thatMatches("publisher", "drudge")
-                .thatMatches("publisher", "nyt")
-                .thatMatches("year", "2015")
-                .thatMatches("category", "cars")
-                .thatMatches("category", "food")
-                .thatMatches("category", "animals");
+                .setParameter("author", "abc")
+                .setParameter("author", "def")
+                .setParameter("publisher", "drudge")
+                .setParameter("publisher", "nyt")
+                .setParameter("year", "2015")
+                .setParameter("category", "cars")
+                .setParameter("category", "food")
+                .setParameter("category", "animals");
 
 
         FilteredListener<Article> filteredListener = FilteredListener.<Article>builder()

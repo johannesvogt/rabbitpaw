@@ -1,44 +1,37 @@
 package jv.rabbitfilter.consumer;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rabbitmq.client.*;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
 import jv.rabbitfilter.core.MessageConfig;
+import jv.rabbitfilter.core.MessageDeserializer;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.function.Consumer;
 
 /**
  * Created by johannes on 16/08/15.
  */
-public class MessageConsumer<T> extends DefaultConsumer implements ShutdownListener {
+public class MessageConsumer<T> extends DefaultConsumer {
 
-    private final MessageConfig<T> messageConfig;
     private final Consumer<T> consumer;
+    private final MessageDeserializer<T> deserializer;
 
-    public MessageConsumer(Channel channel, Consumer<T> consumer, MessageConfig<T> messageConfig) {
+    public MessageConsumer(Channel channel, Consumer<T> consumer, MessageDeserializer<T> deserializer) {
         super(channel);
-        this.messageConfig = messageConfig;
         this.consumer = consumer;
+        this.deserializer = deserializer;
     }
 
     @Override
     public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
         try {
-            T message = messageConfig.getMessageClass()
-                    .cast(new ObjectInputStream(new ByteArrayInputStream(body)).readObject());
+            T message = deserializer.deserialize(body);
             consumer.accept(message);
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    @Override
-    public void shutdownCompleted(ShutdownSignalException cause) {
-
-    }
 }

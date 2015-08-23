@@ -5,11 +5,10 @@ import com.google.common.collect.Maps;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import jv.rabbitfilter.core.MessageConfig;
+import jv.rabbitfilter.core.MessageSerializer;
 import jv.rabbitfilter.core.annotation.Filterable;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.util.TreeMap;
 
@@ -22,11 +21,22 @@ public class Dispatcher<T> {
 
     private final MessageConfig<T> messageConfig;
 
+    private final MessageSerializer<T> serializer;
+
     private Channel channel;
 
     public Dispatcher(Connection connection, Class<T> messageClass) {
+        this(connection, messageClass, null);
+    }
+
+    public Dispatcher(Connection connection, Class<T> messageClass, MessageSerializer<T> serializer) {
         this.connection = connection;
         this.messageConfig = MessageConfig.of(messageClass);
+        if (serializer == null) {
+            this.serializer = new DefaultSerializer<>();
+        } else {
+            this.serializer = serializer;
+        }
     }
 
     private void bind() throws IOException {
@@ -54,9 +64,7 @@ public class Dispatcher<T> {
     }
 
     private byte[] serialize(T message) throws IOException {
-        ByteArrayOutputStream b = new ByteArrayOutputStream();
-        new ObjectOutputStream(b).writeObject(message);
-        return b.toByteArray();
+        return serializer.serialize(message);
     }
 
 }

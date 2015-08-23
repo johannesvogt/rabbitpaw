@@ -5,6 +5,8 @@ import com.google.common.collect.Lists;
 import jv.rabbitfilter.core.MessageConfig;
 import jv.rabbitfilter.core.MessageConfig.FieldEntry;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.*;
 
 /**
@@ -20,35 +22,46 @@ public class Binding implements Iterable<Binding.Stage> {
 
     static <T> Binding of(MessageFilter<T> messageFilter) {
         Binding binding = new Binding();
+        String bindingId = randomId();
+        MessageConfig<T> messageConfig = messageFilter.getMessageConfig();
 
-        RoutingPattern routingPattern = new RoutingPattern(messageFilter.getMessageConfig().size());
+        RoutingKeyPattern routingKeyPattern = new RoutingKeyPattern(messageConfig.size());
 
-        for (FieldEntry field : messageFilter.getMessageConfig()) {
+        for (FieldEntry field : messageConfig) {
             List<String> param = messageFilter.getParam(field.name);
 
             if (param != null && param.size() == 1) {
-                    routingPattern.addSequential(field.index, param.get(0));
+                    routingKeyPattern.addSequential(field.index, param.get(0));
 
             }
         }
-        for (FieldEntry field : messageFilter.getMessageConfig()) {
+        for (FieldEntry field : messageConfig) {
             List<String> param = messageFilter.getParam(field.name);
 
             if (param != null && param.size() > 1) {
-                if (routingPattern.parallel != null) {
-                    binding.addLevel(routingPattern.render(), field.isLast);
-                    routingPattern = new RoutingPattern(messageFilter.getMessageConfig().size());
+                if (routingKeyPattern.parallel != null) {
+                    binding.addLevel(routingKeyPattern.render(),
+                            bindingId, messageConfig.getExchangeName(), field.isLast);
+                    routingKeyPattern = new RoutingKeyPattern(messageFilter.getMessageConfig().size());
                 }
-                routingPattern.setParallel(field.index, param);
+                routingKeyPattern.setParallel(field.index, param);
             }
         }
 
-        binding.addLevel(routingPattern.render(), true);
+        binding.addLevel(routingKeyPattern.render(), bindingId, messageConfig.getExchangeName(), true);
         return binding;
     }
 
-    private void addLevel(List<String> keys, boolean isLastLevel) {
-        stages.add(new Stage(keys, isLastLevel, stages.size() + 1));
+    private void addLevel(List<String> keys, String bindingId, String exchangeName, boolean isQueueBinding) {
+        String src;
+        String dest;
+        if (stages.size() == 0) {
+            src = exchangeName;
+        } else {
+            src = bindingId + "_" +stages.size();
+        }
+        dest = bindingId + "_" + (stages.size() + 1);
+        stages.add(new Stage(keys, isQueueBinding, src, dest));
     }
 
     public Iterator<Stage> iterator() {
@@ -70,23 +83,25 @@ public class Binding implements Iterable<Binding.Stage> {
     static class Stage {
         List<String> keys;
 
-        final boolean isLast;
+        final boolean isQueueBinding;
 
-        final int level;
+        final String src;
+        final String dest;
 
-        public Stage(List<String> keys, boolean lastLevel, int level) {
+        public Stage(List<String> keys, boolean isQueueBinding, String src, String dest) {
             this.keys = keys;
-            this.isLast = lastLevel;
-            this.level = level;
+            this.isQueueBinding = isQueueBinding;
+            this.src = src;
+            this.dest = dest;
         }
     }
 
-    private static class RoutingPattern {
+    private static class RoutingKeyPattern {
         Collection<String> parallel;
         int parallelIndex;
         final List<String> sequentials;
 
-        RoutingPattern(int size) {
+        RoutingKeyPattern(int size) {
             this.sequentials = new ArrayList<String>(Collections.nCopies(size, "*"));
         }
 
@@ -116,4 +131,11 @@ public class Binding implements Iterable<Binding.Stage> {
             return keys;
         }
     }
+
+    private static SecureRandom random = new SecureRandom();
+
+    private static String randomId() {
+        return new BigInteger(130, random).toString(32);
+    }
+
 }
