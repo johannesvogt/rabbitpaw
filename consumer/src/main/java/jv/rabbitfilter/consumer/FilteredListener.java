@@ -12,7 +12,6 @@ import java.util.function.Consumer;
  */
 public class FilteredListener<T> {
 
-    private final Connection connection;
     private final Binding binding;
     private final Consumer<T> consumer;
     private final MessageDeserializer<T> deserializer;
@@ -20,8 +19,7 @@ public class FilteredListener<T> {
     private String consumerTag;
     private Channel channel;
 
-    private FilteredListener(MessageFilter<T> messageFilter, Connection connection, Consumer<T> consumer, MessageDeserializer<T> deserializer) {
-        this.connection = connection;
+    private FilteredListener(MessageFilter<T> messageFilter, Consumer<T> consumer, MessageDeserializer<T> deserializer) {
         this.binding = Binding.of(messageFilter);
         this.consumer = consumer;
         if (deserializer == null) {
@@ -31,7 +29,7 @@ public class FilteredListener<T> {
         }
     }
 
-    public void bind() throws IOException {
+    public void bind(Connection connection) throws IOException {
         channel = connection.createChannel();
 
         for (Binding.Stage stage : binding) {
@@ -64,6 +62,7 @@ public class FilteredListener<T> {
                 }
             }
         }
+        channel.close();
     }
 
     public static <T> Builder<T> builder() {
@@ -74,12 +73,11 @@ public class FilteredListener<T> {
         private MessageFilter<T> messageFilter;
         private Consumer<T> consumer;
         private MessageDeserializer<T> deserializer;
-        private Connection connection;
 
         private Builder() {}
 
         public FilteredListener<T> build() {
-            return new FilteredListener<>(messageFilter, connection, consumer, deserializer);
+            return new FilteredListener<>(messageFilter, consumer, deserializer);
         }
 
         public Builder<T> messageFilter(MessageFilter<T> messageFilter) {
@@ -92,14 +90,10 @@ public class FilteredListener<T> {
             return this;
         }
 
-        public Builder<T> consumer(MessageDeserializer<T> deserializer) {
+        public Builder<T> messageDeserializer(MessageDeserializer<T> deserializer) {
             this.deserializer = deserializer;
             return this;
         }
 
-        public Builder<T> connection(Connection connection) {
-            this.connection = connection;
-            return this;
-        }
     }
 }

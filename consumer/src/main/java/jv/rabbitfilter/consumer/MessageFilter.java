@@ -25,25 +25,15 @@ public class MessageFilter<T> {
         return new MessageFilter<>(messageClass);
     }
 
-    public MessageFilter<T> setParameter(String fieldName, String fieldValue) {
+    public MessageFilter<T> setParameter(String fieldName, String... fieldValues) {
         if (!messageConfig.contains(fieldName)) {
             throw new IllegalArgumentException("Field '" + fieldName + "' not known for type '" + messageConfig.getMessageClass() + "'.");
         }
-        filterParams.put(fieldName, fieldValue);
+        for (String fieldValue : fieldValues) {
+            filterParams.put(fieldName, fieldValue);
+        }
         return this;
     }
-
-//    public MessageFilter<T> setParameter(String fieldName, Object fieldValue) {
-//        if (!messageConfig.contains(fieldName)) {
-//            throw new IllegalArgumentException("Field '" + fieldName + "' not known for type '" + messageConfig.getMessageClass() + "'.");
-//        }
-//        if (messageConfig.getFieldType(fieldName).isInstance(fieldValue)) {
-//            throw new IllegalArgumentException("Field '" + fieldName + "' is of type '" + messageConfig.getFieldType(fieldName)
-//                    + "'. Assigned object is of type'" + fieldValue.getClass().getName() + "'.");
-//        }
-//        filterParams.put(fieldName, fieldValue);
-//        return this;
-//    }
 
     List<String> getParam(String field) {
         return Lists.newArrayList(filterParams.get(field));

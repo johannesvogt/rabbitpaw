@@ -7,47 +7,43 @@ import jv.rabbitfilter.consumer.MessageFilter;
 import jv.rabbitfilter.producer.Dispatcher;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by johannes on 15/08/15.
  */
 public class Main {
     public static void main(String[] args) throws IOException, IllegalAccessException {
-//        Article article = new Article("my title", "my abstract", "my author", new Date());
-//
-//        new Producer().publish(article);
-//
-//        System.out.println("Done.");
 
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
         Connection connection = factory.newConnection();
 
         MessageFilter<Article> messageFilter = MessageFilter.of(Article.class)
-                .setParameter("author", "abc")
-                .setParameter("author", "def")
-                .setParameter("publisher", "drudge")
-                .setParameter("publisher", "nyt")
-                .setParameter("year", "2015")
-                .setParameter("category", "cars")
-                .setParameter("category", "food")
-                .setParameter("category", "animals");
+                .setParameter("author", "abc", "def")
+                .setParameter("publisher", "drudge", "nyt")
+                .setParameter("year", "2015-08")
+                .setParameter("category", "cars", "food", "animals");
 
 
         FilteredListener<Article> filteredListener = FilteredListener.<Article>builder()
-                .connection(connection)
-                .consumer(System.out::println)
                 .messageFilter(messageFilter)
+                .consumer(System.out::println)
                 .build();
 
-        filteredListener.bind();
+        filteredListener.bind(connection);
 
+        Dispatcher<Article> dispatcher = Dispatcher.builder(Article.class)
+                .addTypeAdapter(Date.class, d -> new SimpleDateFormat("yyyy-MM").format(d))
+                .build();
 
-        Dispatcher<Article> dispatcher = new Dispatcher<Article>(connection, Article.class);
+        dispatcher.bind(connection);
 
-        dispatcher.publish(new Article("nyt", "food", "abc", "2015"));
-        dispatcher.publish(new Article("drudge", "food", "abc", "2015"));
+        dispatcher.publish(new Article("nyt", "food", "abc", new Date()));
+        dispatcher.publish(new Article("drudge", "food", "abc", new Date()));
 
-//        filteredListener.unbind();
+        filteredListener.unbind();
+        dispatcher.unbind();
     }
 }

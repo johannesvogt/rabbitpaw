@@ -20,12 +20,22 @@ public class Article implements Serializable {
     private String author;
 
     @Filterable
-    private String year;
+    private Date year;
 
-    public Article(String publisher, String category, String author, String date) {
+    public Article(String publisher, String category, String author, Date date) {
         this.publisher = publisher;
         this.category = category;
         this.author = author;
         this.year = date;
+    }
+
+    @Override
+    public String toString() {
+        return "Article{" +
+                "publisher='" + publisher + '\'' +
+                ", category='" + category + '\'' +
+                ", author='" + author + '\'' +
+                ", year=" + year +
+                '}';
     }
 }
