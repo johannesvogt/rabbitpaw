@@ -4,13 +4,14 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import nz.gen.vogt.rabbitpaw.core.MessageDeserializer;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.function.Consumer;
 
 /**
  * Created by johannes on 15/08/15.
  */
-public class Subscriber<T> {
+public class Subscriber<T> implements Closeable {
 
     private final Binding binding;
     private final Consumer<T> consumer;
@@ -72,6 +73,12 @@ public class Subscriber<T> {
 
     public static <T> Builder<T> builder() {
         return new Builder<>();
+    }
+
+    @Override
+    public void close() throws IOException {
+        unbind();
+        channel = null;
     }
 
     public static class Builder<T> {

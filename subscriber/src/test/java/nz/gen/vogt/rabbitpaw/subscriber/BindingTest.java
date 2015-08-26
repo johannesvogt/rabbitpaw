@@ -1,6 +1,6 @@
 package nz.gen.vogt.rabbitpaw.subscriber;
 
-import nz.gen.vogt.rabbitpaw.core.annotation.Filterable;
+import nz.gen.vogt.rabbitpaw.core.annotation.RoutingField;
 import nz.gen.vogt.rabbitpaw.core.annotation.Message;
 import org.junit.Test;
 
@@ -13,11 +13,11 @@ public class BindingTest {
 
     @Message
     private static class TestMessage {
-        @Filterable
+        @RoutingField
         private String category;
-        @Filterable
+        @RoutingField
         private Object location;
-        @Filterable
+        @RoutingField
         private String color;
     }
 
@@ -197,13 +197,13 @@ public class BindingTest {
 
     @Message
     private static class TestMessage2 {
-        @Filterable
+        @RoutingField
         private String category;
-        @Filterable
+        @RoutingField
         private Object location;
-        @Filterable
+        @RoutingField
         private String color;
-        @Filterable
+        @RoutingField
         private String year;
     }
 

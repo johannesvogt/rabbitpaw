@@ -1,6 +1,6 @@
 package nz.gen.vogt.rabbitpaw.demo;
 
-import nz.gen.vogt.rabbitpaw.core.annotation.Filterable;
+import nz.gen.vogt.rabbitpaw.core.annotation.RoutingField;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -10,16 +10,16 @@ import java.util.Date;
  */
 public class Article implements Serializable {
 
-    @Filterable
+    @RoutingField
     private String publisher;
 
-    @Filterable
+    @RoutingField
     private String category;
 
-    @Filterable
+    @RoutingField
     private String author;
 
-    @Filterable
+    @RoutingField
     private Date year;
 
     public Article(String publisher, String category, String author, Date date) {

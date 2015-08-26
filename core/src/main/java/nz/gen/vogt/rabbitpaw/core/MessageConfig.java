@@ -1,6 +1,7 @@
 package nz.gen.vogt.rabbitpaw.core;
 
-import nz.gen.vogt.rabbitpaw.core.annotation.Filterable;
+import nz.gen.vogt.rabbitpaw.core.annotation.Message;
+import nz.gen.vogt.rabbitpaw.core.annotation.RoutingField;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
@@ -17,12 +18,26 @@ public class MessageConfig<T> implements Iterable<MessageConfig.FieldEntry> {
 
     private final Class<T> messageClass;
 
+    private final String exchangeName;
+
     private MessageConfig(Class<T> messageClass) {
+
+        if (messageClass.isAnnotationPresent(Message.class)
+                && !messageClass.getAnnotation(Message.class).exchangeName().isEmpty()) {
+            exchangeName = messageClass.getAnnotation(Message.class).exchangeName();
+        } else {
+            exchangeName = messageClass.getName();
+        }
+
         Map<String, Class<?>> fieldMap = new TreeMap<String, Class<?>>();
         for (Field field : messageClass.getDeclaredFields()) {
             field.setAccessible(true);
-            if (field.isAnnotationPresent(Filterable.class)) {
-                fieldMap.put(field.getName(), field.getType());
+            if (field.isAnnotationPresent(RoutingField.class)) {
+                String routingFieldName = field.getAnnotation(RoutingField.class).name();
+                if (routingFieldName.isEmpty()) {
+                    routingFieldName = field.getName();
+                }
+                fieldMap.put(routingFieldName, field.getType());
             }
         }
         this.fields = Collections.unmodifiableMap(fieldMap);
@@ -56,9 +71,9 @@ public class MessageConfig<T> implements Iterable<MessageConfig.FieldEntry> {
         return messageClass;
     }
 
-    public Class<?> getFieldType(String fieldName) {
-        return fields.get(fieldName);
-    }
+//    public Class<?> getFieldType(String fieldName) {
+//        return fields.get(fieldName);
+//    }
 
     public static class FieldEntry {
         public final String name;
@@ -78,7 +93,7 @@ public class MessageConfig<T> implements Iterable<MessageConfig.FieldEntry> {
     }
 
     public String getExchangeName() {
-        return messageClass.getName();
+        return exchangeName;
     }
 
 }

@@ -4,8 +4,9 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import nz.gen.vogt.rabbitpaw.core.MessageConfig;
 import nz.gen.vogt.rabbitpaw.core.MessageSerializer;
-import nz.gen.vogt.rabbitpaw.core.annotation.Filterable;
+import nz.gen.vogt.rabbitpaw.core.annotation.RoutingField;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
 /**
  * Created by johannes on 15/08/15.
  */
-public class Publisher<T> {
+public class Publisher<T> implements Closeable {
 
     private final MessageConfig<T> messageConfig;
 
@@ -38,17 +39,13 @@ public class Publisher<T> {
     }
 
     public void bind(Connection connection) throws IOException {
-        if (channel != null && channel.isOpen()) {
-            channel.close();
-        }
+        unbind();
         channel = connection.createChannel();
         channel.exchangeDeclare(messageConfig.getExchangeName(), "topic", false, true, null);
     }
 
     public void unbind() throws IOException {
-        if (channel != null && channel.isOpen()) {
-            channel.close();
-        }
+        close();
     }
 
     public void publish(T message) throws IOException, IllegalAccessException {
@@ -63,7 +60,7 @@ public class Publisher<T> {
         TreeMap<String, String> keyElements = new TreeMap<>();
         for (Field field : message.getClass().getDeclaredFields()) {
             field.setAccessible(true);
-            if (field.isAnnotationPresent(Filterable.class)) {
+            if (field.isAnnotationPresent(RoutingField.class)) {
                 keyElements.put(field.getName(), getKeyPart(field.getType(), field.get(message)));
             }
         }
@@ -85,6 +82,14 @@ public class Publisher<T> {
 
     public static <T> Builder<T> builder(Class<T> messageClass) {
         return new Builder<>(messageClass);
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (channel != null && channel.isOpen()) {
+            channel.close();
+        }
+        channel = null;
     }
 
     public static class Builder<T> {
