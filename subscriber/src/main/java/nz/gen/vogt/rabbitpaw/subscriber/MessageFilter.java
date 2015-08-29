@@ -30,6 +30,12 @@ public class MessageFilter<T> {
         return this;
     }
 
+    public MessageFilter<T> setParameter(String fieldName, Object... fieldValues) {
+        return setParameter(fieldName,
+                Arrays.stream(fieldValues)
+                        .map(Object::toString).toArray(size -> new String[size]));
+    }
+
     List<String> getParam(String field) {
         return filterParams.get(field);
     }

@@ -71,10 +71,6 @@ public class MessageConfig<T> implements Iterable<MessageConfig.FieldEntry> {
         return messageClass;
     }
 
-//    public Class<?> getFieldType(String fieldName) {
-//        return fields.get(fieldName);
-//    }
-
     public static class FieldEntry {
         public final String name;
         public final int index;
