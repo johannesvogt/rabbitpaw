@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Created by johannes on 18/08/15.
+ * Created by Johannes Vogt on 18/08/15.
  */
 public class MessageConfig<T> implements Iterable<MessageConfig.FieldEntry> {
 

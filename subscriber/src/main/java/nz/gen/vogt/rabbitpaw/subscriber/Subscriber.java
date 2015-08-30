@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 /**
- * Created by johannes on 15/08/15.
+ * Created by Johannes Vogt on 15/08/15.
  */
 public class Subscriber<T> implements Closeable {
 

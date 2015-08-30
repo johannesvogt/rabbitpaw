@@ -17,7 +17,7 @@ import static nz.gen.vogt.rabbitpaw.demo.newsticker.NewsItem.Category.*;
 import static nz.gen.vogt.rabbitpaw.demo.newsticker.NewsItem.Newspaper.*;
 
 /**
- * Created by johannes on 15/08/15.
+ * Created by Johannes Vogt on 15/08/15.
  */
 public class Main {
     public static void main(String[] args) throws IOException, IllegalAccessException, InterruptedException {

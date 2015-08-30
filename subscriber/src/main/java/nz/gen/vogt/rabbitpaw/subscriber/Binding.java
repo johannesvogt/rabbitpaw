@@ -9,7 +9,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Created by johannes on 16/08/15.
+ * Created by Johannes Vogt on 16/08/15.
  */
 public class Binding implements Iterable<Binding.Stage> {
 

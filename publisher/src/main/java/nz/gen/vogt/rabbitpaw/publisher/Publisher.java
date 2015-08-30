@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Created by johannes on 15/08/15.
+ * Created by Johannes Vogt on 15/08/15.
  */
 public class Publisher<T> implements Closeable {
 

@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 
 /**
- * Created by johannes on 23/08/15.
+ * Created by Johannes Vogt on 23/08/15.
  */
 public class DefaultDeserializer<T> implements MessageDeserializer<T> {
 

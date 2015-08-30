@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 /**
- * Created by johannes on 16/08/15.
+ * Created by Johannes Vogt on 16/08/15.
  */
 public class MessageConsumer<T> extends DefaultConsumer {
 

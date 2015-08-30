@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * Created by johannes on 15/08/15.
+ * Created by Johannes Vogt on 15/08/15.
  */
 public class NewsItem implements Serializable {
 
