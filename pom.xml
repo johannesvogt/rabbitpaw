@@ -13,6 +13,12 @@
         <rabbitpaw.version>1.0-SNAPSHOT</rabbitpaw.version>
     </properties>
 
+    <scm>
+        <connection>scm:git:git@github.com:johannesvogt/rabbitpaw.git</connection>
+        <url>scm:git:git@github.com:johannesvogt/rabbitpaw.git</url>
+        <developerConnection>scm:git:git@github.com:johannesvogt/rabbitpaw.git</developerConnection>
+    </scm>
+
     <modules>
         <module>core</module>
         <module>publisher</module>
