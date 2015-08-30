@@ -11,6 +11,12 @@
 
     <artifactId>rabbitpaw-consumer</artifactId>
 
+    <scm>
+        <connection>scm:git:git@github.com:johannesvogt/rabbitpaw.git</connection>
+        <url>scm:git:git@github.com:johannesvogt/rabbitpaw.git</url>
+        <developerConnection>scm:git:git@github.com:johannesvogt/rabbitpaw.git</developerConnection>
+    </scm>
+
     <dependencies>
 
         <dependency>
