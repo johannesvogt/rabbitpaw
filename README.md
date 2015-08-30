@@ -51,3 +51,5 @@ In the above example the following bindings would be created:
 Exchange1(publish point for MyMessage) ->(Bindings: 'books.*', 'electronics.*')-> Exchange2 ->(Bindings: '*.2012', '*.2013', '*.2014', '*.2015')-> Queue
 ```
 
+The connection to the RabbitMQ - Server are passed to `Publisher` and to `Subscriber` via the `.bind` - methods. For more detailed examples see the demos.
+
