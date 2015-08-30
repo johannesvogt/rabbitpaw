@@ -33,7 +33,7 @@ publisher.publish(myMessage);
 ```
 When `category` has the value "books", and `date` is 01/01/2015, then the routing key for this message will be "books.2015" . The TypeAdapter added to the publisher defines how to translate objects to routing-strings. By default the `.toString()` method is used for all objects.
 
-On the subscriber-side a `MessageFilter` is created to define to which Messages the subscriber listens to:
+On the subscriber-side a `MessageFilter` is created to define to which Messages a subscriber listens to:
 ```java
         MessageFilter<MyMessage> filter = MessageFilter.of(MyMessage.class)
                 .setParameter("category", "books", "electronics")
