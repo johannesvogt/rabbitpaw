@@ -4,7 +4,7 @@ Annotation-based message router/filter for RabbitMQ
 
 Rabbitpaw automates routing or filtering of RabbitMQ topic-messages based on annotations. RabbitMQs topic-routing is a very performant way of dispatching messages to many different Consumers (see also [Very fast and scalable topic routing](https://www.rabbitmq.com/blog/2010/09/14/very-fast-and-scalable-topic-routing-part-1/)). 
 
-Rabbitpaw creates routing-keys of messages based on annotated fields in the Message-Class. The exchanges, queues and bindings are automatically created based on a `MessageFilter` - object.
+Rabbitpaw creates routing-keys of messages based on annotated fields of the Message-Class. The exchanges, queues and bindings are automatically created based on a `MessageFilter` - object.
 
 Let's say we have a message-class, annotated with the `RoutingField` annotation:
 ```java
