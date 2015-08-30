@@ -44,7 +44,7 @@ On the subscriber-side a `MessageFilter` is created to define to which Messages 
 
         subscriber.bind(connection);
 ```
-In this case the subscriber would receive all messages where category is "category" or "books" or "electronics", AND where date is between "2012" and "2015". The subscriber automatically creates a queue on the RabbitMQ-Server, plus the needed bindings (and if needed additional exchanges) that reflect the defined behavior.
+In this case the subscriber would receive all messages where category is "books" or "electronics", AND where date is between "2012" and "2015". The subscriber automatically creates a queue on the RabbitMQ-Server, plus the needed bindings (and if needed additional exchanges) that reflect the defined behavior.
 
 In the above example the following bindings would be created:
 ```
