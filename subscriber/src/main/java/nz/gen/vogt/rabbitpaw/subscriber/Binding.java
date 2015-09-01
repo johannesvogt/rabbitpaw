@@ -3,7 +3,10 @@ package nz.gen.vogt.rabbitpaw.subscriber;
 import nz.gen.vogt.rabbitpaw.core.MessageConfig;
 import nz.gen.vogt.rabbitpaw.core.MessageConfig.FieldEntry;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,7 +24,9 @@ public class Binding implements Iterable<Binding.Stage> {
 
     static <T> Binding of(MessageFilter<T> messageFilter) {
         Binding binding = new Binding();
-        String bindingId = randomId();
+//        String bindingId = randomId();
+        String bindingId = makeSHA1Hash(messageFilter.toString());
+        System.out.println(messageFilter.toString() + " : " + bindingId);
         MessageConfig<T> messageConfig = messageFilter.getMessageConfig();
 
         RoutingKeyPattern routingKeyPattern = new RoutingKeyPattern(messageConfig.size());
@@ -137,4 +142,21 @@ public class Binding implements Iterable<Binding.Stage> {
         return new BigInteger(130, random).toString(32);
     }
 
+    private static String makeSHA1Hash(String input) {
+        StringBuilder hexStrBuilder = new StringBuilder();
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA1");
+            md.reset();
+            byte[] buffer = input.getBytes("UTF-8");
+            md.update(buffer);
+            byte[] digest = md.digest();
+
+            for (int i = 0; i < digest.length; i++) {
+                hexStrBuilder.append(Integer.toString((digest[i] & 0xff) + 0x100, 16).substring(1));
+            }
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return hexStrBuilder.toString();
+    }
 }

@@ -33,7 +33,7 @@ public class MessageFilter<T> {
     public MessageFilter<T> setParameter(String fieldName, Object... fieldValues) {
         return setParameter(fieldName,
                 Arrays.stream(fieldValues)
-                        .map(Object::toString).toArray(size -> new String[size]));
+                        .map(Object::toString).toArray(String[]::new));
     }
 
     List<String> getParam(String field) {
@@ -44,4 +44,11 @@ public class MessageFilter<T> {
         return messageConfig;
     }
 
+    @Override
+    public String toString() {
+        return "MessageFilter{" +
+                "messageConfig=" + messageConfig +
+                ", filterParams=" + filterParams +
+                '}';
+    }
 }

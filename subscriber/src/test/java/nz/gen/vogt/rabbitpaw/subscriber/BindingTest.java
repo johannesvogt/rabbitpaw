@@ -66,8 +66,7 @@ public class BindingTest {
     @Test
     public void testParallelFilter() {
         MessageFilter filter = MessageFilter.of(TestMessage.class)
-                .setParameter("color", "blue")
-                .setParameter("color", "orange");
+                .setParameter("color", "blue", "orange");
 
         Binding binding = Binding.of(filter);
 
@@ -82,10 +81,8 @@ public class BindingTest {
     @Test
     public void testParallelFilter2() {
         MessageFilter filter = MessageFilter.of(TestMessage.class)
-                .setParameter("color", "blue")
-                .setParameter("color", "orange")
-                .setParameter("location", "zoo")
-                .setParameter("location", "city");
+                .setParameter("color", "blue", "orange")
+                .setParameter("location", "zoo", "city");
 
         Binding binding = Binding.of(filter);
 
@@ -103,10 +100,8 @@ public class BindingTest {
     @Test
     public void testParallelFilter3() {
         MessageFilter filter = MessageFilter.of(TestMessage.class)
-                .setParameter("color", "blue")
-                .setParameter("color", "orange")
-                .setParameter("category", "animal")
-                .setParameter("category", "car");
+                .setParameter("color", "blue", "orange")
+                .setParameter("category", "animal", "car");
 
         Binding binding = Binding.of(filter);
 
@@ -125,10 +120,8 @@ public class BindingTest {
     @Test
     public void testParallelFilter4() {
         MessageFilter filter = MessageFilter.of(TestMessage.class)
-                .setParameter("location", "city")
-                .setParameter("location", "zoo")
-                .setParameter("category", "animal")
-                .setParameter("category", "car");
+                .setParameter("location", "city", "zoo")
+                .setParameter("category", "animal", "car");
 
         Binding binding = Binding.of(filter);
 
@@ -147,12 +140,9 @@ public class BindingTest {
     @Test
     public void testParallelFilter5() {
         MessageFilter filter = MessageFilter.of(TestMessage.class)
-                .setParameter("location", "city")
-                .setParameter("location", "zoo")
-                .setParameter("color", "blue")
-                .setParameter("color", "orange")
-                .setParameter("category", "animal")
-                .setParameter("category", "car");
+                .setParameter("location", "city", "zoo")
+                .setParameter("color", "blue", "orange")
+                .setParameter("category", "animal", "car");
 
         Binding binding = Binding.of(filter);
 
@@ -175,11 +165,9 @@ public class BindingTest {
     @Test
     public void testParallelFilter6() {
         MessageFilter filter = MessageFilter.of(TestMessage.class)
-                .setParameter("location", "city")
-                .setParameter("location", "zoo")
+                .setParameter("location", "city", "zoo")
                 .setParameter("color", "orange")
-                .setParameter("category", "animal")
-                .setParameter("category", "car");
+                .setParameter("category", "animal", "car");
 
         Binding binding = Binding.of(filter);
 
@@ -210,11 +198,9 @@ public class BindingTest {
     @Test
     public void testParallelFilter7() {
         MessageFilter filter = MessageFilter.of(TestMessage2.class)
-                .setParameter("location", "city")
-                .setParameter("location", "zoo")
+                .setParameter("location", "city", "zoo")
                 .setParameter("color", "orange")
-                .setParameter("category", "animal")
-                .setParameter("category", "car")
+                .setParameter("category", "animal", "car")
                 .setParameter("year", "2015");
 
         Binding binding = Binding.of(filter);

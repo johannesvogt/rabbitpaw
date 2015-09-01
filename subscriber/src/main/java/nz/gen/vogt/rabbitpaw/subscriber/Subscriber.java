@@ -16,17 +16,24 @@ public class Subscriber<T> implements Closeable {
     private final Binding binding;
     private final Consumer<T> consumer;
     private final MessageDeserializer<T> deserializer;
+    private final QueueConfig queueConfig;
 
     private String consumerTag;
     private Channel channel;
 
-    private Subscriber(MessageFilter<T> messageFilter, Consumer<T> consumer, MessageDeserializer<T> deserializer) {
+    private Subscriber(MessageFilter<T> messageFilter, Consumer<T> consumer,
+                       MessageDeserializer<T> deserializer, QueueConfig queueConfig) {
         this.binding = Binding.of(messageFilter);
         this.consumer = consumer;
         if (deserializer == null) {
             this.deserializer = new DefaultDeserializer<>(messageFilter.getMessageConfig().getMessageClass());
         } else {
             this.deserializer = deserializer;
+        }
+        if (queueConfig == null) {
+            this.queueConfig = new QueueConfig(false, true, null);
+        } else {
+            this.queueConfig = queueConfig;
         }
     }
 
@@ -37,15 +44,15 @@ public class Subscriber<T> implements Closeable {
         channel = connection.createChannel();
 
         for (Binding.Stage stage : binding) {
-            channel.exchangeDeclare(stage.src, "topic", false, true, null);
+            channel.exchangeDeclare(stage.src, "topic", queueConfig.isDurable(), queueConfig.isAutoDelete(), queueConfig.getArguments());
             if (stage.isQueueBinding) {
-                channel.queueDeclare(stage.dest, false, true, true, null);
+                channel.queueDeclare(stage.dest, queueConfig.isDurable(), true, queueConfig.isAutoDelete(), queueConfig.getArguments());
                 for (String key : stage.keys) {
                     channel.queueBind(stage.dest, stage.src, key);
                     consumerTag = channel.basicConsume(stage.dest, true, new MessageConsumer<>(channel, consumer, deserializer));
                 }
             } else {
-                channel.exchangeDeclare(stage.dest, "topic", false, true, null);
+                channel.exchangeDeclare(stage.dest, "topic", queueConfig.isDurable(), queueConfig.isAutoDelete(), queueConfig.getArguments());
                 for (String key : stage.keys) {
                     channel.exchangeBind(stage.dest, stage.src, key);
                 }
@@ -85,11 +92,12 @@ public class Subscriber<T> implements Closeable {
         private MessageFilter<T> messageFilter;
         private Consumer<T> consumer;
         private MessageDeserializer<T> deserializer;
+        private QueueConfig queueConfig;
 
         private Builder() {}
 
         public Subscriber<T> build() {
-            return new Subscriber<>(messageFilter, consumer, deserializer);
+            return new Subscriber<>(messageFilter, consumer, deserializer, queueConfig);
         }
 
         public Builder<T> messageFilter(MessageFilter<T> messageFilter) {
@@ -104,6 +112,11 @@ public class Subscriber<T> implements Closeable {
 
         public Builder<T> messageDeserializer(MessageDeserializer<T> deserializer) {
             this.deserializer = deserializer;
+            return this;
+        }
+
+        public Builder<T> queueConfig(QueueConfig queueConfig) {
+            this.queueConfig = queueConfig;
             return this;
         }
 

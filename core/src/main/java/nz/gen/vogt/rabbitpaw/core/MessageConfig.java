@@ -92,4 +92,12 @@ public class MessageConfig<T> implements Iterable<MessageConfig.FieldEntry> {
         return exchangeName;
     }
 
+    @Override
+    public String toString() {
+        return "MessageConfig{" +
+                "fields=" + fields +
+                ", messageClass=" + messageClass +
+                ", exchangeName='" + exchangeName + '\'' +
+                '}';
+    }
 }
